@@ -1,0 +1,30 @@
+name: Android APK only
+
+# ---------------------------------------------------------------------------
+# Compila UNICAMENTE el APK de Android de Mixxx, en la nube de GitHub.
+#
+# Por que existe este archivo: el workflow oficial de Mixxx (build.yml) compila
+# a la vez Windows, macOS, Linux, AppImage y Flatpak. En un fork eso son horas
+# de CI y varios objetivos que fallarian por falta de secretos. Aqui llamamos a
+# una copia recortada (build-android.yml) que solo tiene la entrada de Android.
+#
+# No hace falta Docker, ni Ubuntu, ni Android Studio, ni instalar nada local.
+# ---------------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+
+jobs:
+  android:
+    name: Android APK
+    permissions:
+      contents: read # para actions/checkout
+      actions: write # para que el CI pueda limpiar caches antiguas
+    # Los secretos de build.yml estan declarados como required: false, asi que
+    # se pueden omitir. Sin ANDROID_SIGNING_KEYSTORE_BASE64, el propio CI
+    # genera un keystore temporal y firma el APK igualmente.
+    uses: ./.github/workflows/build-android.yml
+    with:
+      branch: ${{ github.ref_name }}
+      ref: ${{ github.ref }}
+      publish: false
